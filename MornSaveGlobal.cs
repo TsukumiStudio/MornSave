@@ -6,7 +6,7 @@ using UnityEngine;
 namespace MornSave
 {
     [CreateAssetMenu(fileName = nameof(MornSaveGlobal), menuName = "Morn/" + nameof(MornSaveGlobal))]
-    internal sealed class MornSaveGlobal : MornGlobalBase<MornSaveGlobal>
+    public sealed class MornSaveGlobal : MornGlobalBase<MornSaveGlobal>
     {
         [Serializable]
         private struct DefaultValueInfo<T>
