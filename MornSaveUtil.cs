@@ -6,48 +6,50 @@ using UnityEngine;
 using MornSteam;
 #endif
 
-namespace MornSave
+namespace MornLib
 {
     public static class MornSaveUtil
     {
+        /// <summary>16バイトの初期化ベクトル（IV）</summary>
         private static string _cryptIv;
-        /// <summary>16バイトの初期化ベクトル（IV）を設定します。 </summary>
+        /// <summary>16バイトの初期化ベクトル（IV）を設定 </summary>
         public static string CryptIv
         {
             set
             {
                 if (value == null)
                 {
-                    MornSaveGlobal.LogError("CryptIvにnullは設定できません");
+                    MornSaveLogger.LogError("CryptIvにnullは設定できません");
                     return;
                 }
 
                 var byteCount = System.Text.Encoding.UTF8.GetByteCount(value);
                 if (byteCount != 16)
                 {
-                    MornSaveGlobal.LogError($"CryptIvは16バイトでなければなりません。現在のバイト数: {byteCount}");
+                    MornSaveLogger.LogError($"CryptIvは16バイトでなければなりません。現在のバイト数: {byteCount}");
                     return;
                 }
 
                 _cryptIv = value;
             }
         }
+        /// <summary>32バイトの暗号化キー</summary>
         private static string _cryptKey;
-        /// <summary>32バイトの暗号化キーを設定します。</summary>
+        /// <summary>32バイトの暗号化キーを設定</summary>
         public static string CryptKey
         {
             set
             {
                 if (value == null)
                 {
-                    MornSaveGlobal.LogError("CryptKeyにnullは設定できません");
+                    MornSaveLogger.LogError("CryptKeyにnullは設定できません");
                     return;
                 }
 
                 var byteCount = System.Text.Encoding.UTF8.GetByteCount(value);
                 if (byteCount != 32)
                 {
-                    MornSaveGlobal.LogError($"CryptKeyは32バイトでなければなりません。現在のバイト数: {byteCount}");
+                    MornSaveLogger.LogError($"CryptKeyは32バイトでなければなりません。現在のバイト数: {byteCount}");
                     return;
                 }
 
@@ -55,6 +57,7 @@ namespace MornSave
             }
         }
 
+        /// <summary> PlayerPrefsに保存する際のキー名を返す </summary>
         public static string GetCorePlayerPrefsKey()
         {
             return MornSaveGlobal.I.CorePlayerPrefsKey;
@@ -75,7 +78,7 @@ namespace MornSave
             return dirPath;
         }
 
-        /// <summary> Steamも考慮したCoreファイルのパスを返す</summary>
+        /// <summary> Steamも考慮したセーブファイルのパスを返す</summary>
         public static string GetCoreFilePath()
         {
             var fileName = MornSaveGlobal.I.CoreFileName + MornSaveGlobal.I.CoreExtensionName;
@@ -83,21 +86,23 @@ namespace MornSave
             return filePath;
         }
 
+        /// <summary> 指定されたパスのディレクトリが存在しない場合、作成する </summary>
         private static void EnsurePath(string path)
         {
             var directoryName = Path.GetDirectoryName(path);
             if (directoryName != null && !Directory.Exists(directoryName))
             {
                 Directory.CreateDirectory(directoryName);
-                MornSaveGlobal.Log($"セーブディレクトリを作成しました: {directoryName}");
+                MornSaveLogger.Log($"セーブディレクトリを作成しました: {directoryName}");
             }
         }
 
+        /// <summary> データを暗号化する </summary>
         private static byte[] ToEncrypt(byte[] data)
         {
             if (string.IsNullOrEmpty(_cryptIv) || string.IsNullOrEmpty(_cryptKey))
             {
-                MornSaveGlobal.LogError("CryptIvまたはCryptKeyが設定されていません。暗号化を使用する場合は設定してください。");
+                MornSaveLogger.LogError("CryptIvまたはCryptKeyが設定されていません。暗号化を使用する場合は設定してください。");
             }
             else
             {
@@ -107,18 +112,19 @@ namespace MornSave
                 }
                 catch (Exception e)
                 {
-                    MornSaveGlobal.LogError($"暗号化に失敗: {e.Message}");
+                    MornSaveLogger.LogError($"暗号化に失敗: {e.Message}");
                 }
             }
 
             return data;
         }
 
+        /// <summary> データを復号化する </summary>
         private static byte[] ToDecrypt(byte[] data)
         {
             if (string.IsNullOrEmpty(_cryptIv) || string.IsNullOrEmpty(_cryptKey))
             {
-                MornSaveGlobal.LogError("CryptIvまたはCryptKeyが設定されていません。暗号化を使用する場合は設定してください。");
+                MornSaveLogger.LogError("CryptIvまたはCryptKeyが設定されていません。暗号化を使用する場合は設定してください。");
             }
             else
             {
@@ -128,13 +134,14 @@ namespace MornSave
                 }
                 catch (Exception e)
                 {
-                    MornSaveGlobal.LogError($"復号化に失敗: {e.Message}");
+                    MornSaveLogger.LogError($"復号化に失敗: {e.Message}");
                 }
             }
 
             return data;
         }
 
+        /// <summary> PlayerPrefsからデータを読み込む </summary>
         public static bool LoadFromPlayerPrefs<T>(string key, out T data, bool useDecrypt = false) where T : class
         {
             try
@@ -156,13 +163,14 @@ namespace MornSave
             }
             catch (Exception e)
             {
-                MornSaveGlobal.LogError($"PlayerPrefs読み込み時にエラー発生: {e.Message}");
+                MornSaveLogger.LogError($"PlayerPrefs読み込み時にエラー発生: {e.Message}");
             }
 
             data = null;
             return false;
         }
 
+        /// <summary> PlayerPrefsからデータを読み込む </summary>
         public static bool LoadFromPlayerPrefs(string key, out byte[] data, bool useDecrypt = false)
         {
             try
@@ -181,13 +189,14 @@ namespace MornSave
             }
             catch (Exception e)
             {
-                MornSaveGlobal.LogError($"PlayerPrefs読み込み時にエラー発生: {e.Message}");
+                MornSaveLogger.LogError($"PlayerPrefs読み込み時にエラー発生: {e.Message}");
             }
 
             data = null;
             return false;
         }
 
+        /// <summary> ファイルからデータを読み込む </summary>
         public static bool LoadFromFile<T>(string filePath, out T data, bool useDecrypt = false) where T : class
         {
             try
@@ -203,13 +212,14 @@ namespace MornSave
             }
             catch (Exception e)
             {
-                MornSaveGlobal.LogError($"ファイル読み込み時にエラー発生: {e.Message}");
+                MornSaveLogger.LogError($"ファイル読み込み時にエラー発生: {e.Message}");
             }
 
             data = null;
             return false;
         }
 
+        /// <summary> ファイルからデータを読み込む </summary>
         public static bool LoadFromFile(string filePath, out byte[] data, bool useDecrypt = false)
         {
             try
@@ -227,13 +237,14 @@ namespace MornSave
             }
             catch (Exception e)
             {
-                MornSaveGlobal.LogError($"ファイル読み込み時にエラー発生: {e.Message}");
+                MornSaveLogger.LogError($"ファイル読み込み時にエラー発生: {e.Message}");
             }
 
             data = null;
             return false;
         }
 
+        /// <summary> PlayerPrefsにデータを保存する </summary>
         public static bool SaveToPlayerPrefs<T>(string key, T data, bool useEncrypt = false) where T : class
         {
             var json = JsonUtility.ToJson(data, true);
@@ -246,18 +257,19 @@ namespace MornSave
 
                 PlayerPrefs.SetString(key, json);
                 PlayerPrefs.Save();
-                MornSaveGlobal.Log($"PlayerPrefs保存成功: {key}");
+                MornSaveLogger.Log($"PlayerPrefs保存成功: {key}");
                 return true;
             }
             catch (Exception e)
             {
-                MornSaveGlobal.LogError($"PlayerPrefs保存時にエラー発生: {e.Message}");
+                MornSaveLogger.LogError($"PlayerPrefs保存時にエラー発生: {e.Message}");
             }
 
-            MornSaveGlobal.LogError($"PlayerPrefs保存失敗: {key}");
+            MornSaveLogger.LogError($"PlayerPrefs保存失敗: {key}");
             return false;
         }
 
+        /// <summary> PlayerPrefsにデータを保存する </summary>
         public static bool SaveToPlayerPrefs(string key, byte[] data, bool useEncrypt = false)
         {
             try
@@ -269,24 +281,26 @@ namespace MornSave
 
                 PlayerPrefs.SetString(key, data.ToStringBase64());
                 PlayerPrefs.Save();
-                MornSaveGlobal.Log($"PlayerPrefs保存成功: {key}");
+                MornSaveLogger.Log($"PlayerPrefs保存成功: {key}");
                 return true;
             }
             catch (Exception e)
             {
-                MornSaveGlobal.LogError($"PlayerPrefs保存時にエラー発生: {e.Message}");
+                MornSaveLogger.LogError($"PlayerPrefs保存時にエラー発生: {e.Message}");
             }
 
-            MornSaveGlobal.LogError($"PlayerPrefs保存失敗: {key}");
+            MornSaveLogger.LogError($"PlayerPrefs保存失敗: {key}");
             return false;
         }
 
+        /// <summary> ファイルにデータを保存する </summary>
         public static bool SaveToFile<T>(string filePath, T data, bool useEncrypt = false) where T : class
         {
             var json = JsonUtility.ToJson(data, true);
             return SaveToFile(filePath, json.ToBytesUTF8(), useEncrypt);
         }
 
+        /// <summary> ファイルにデータを保存する </summary>
         public static bool SaveToFile(string filePath, byte[] data, bool useEncrypt = false)
         {
             try
@@ -298,15 +312,15 @@ namespace MornSave
                 }
 
                 File.WriteAllBytes(filePath, data);
-                MornSaveGlobal.Log($"ファイル保存成功: {filePath}");
+                MornSaveLogger.Log($"ファイル保存成功: {filePath}");
                 return true;
             }
             catch (Exception e)
             {
-                MornSaveGlobal.LogError($"ファイル保存時にエラー発生: {e.Message}");
+                MornSaveLogger.LogError($"ファイル保存時にエラー発生: {e.Message}");
             }
 
-            MornSaveGlobal.LogError("ファイル保存失敗");
+            MornSaveLogger.LogError("ファイル保存失敗");
             return false;
         }
     }
