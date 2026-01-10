@@ -14,6 +14,5 @@ namespace MornLib
         public string CoreExtensionName = ".sav";
         [Tooltip("セーブデータを保存するディレクトリ名")]
         public string SaveDir = "Shared";
-        /// <inheritdoc/>
     }
 }

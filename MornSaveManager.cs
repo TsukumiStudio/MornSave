@@ -37,7 +37,7 @@ namespace MornLib
                     {
                         var saveDataString = JsonUtility.ToJson(_current);
                         GUIUtility.systemCopyBuffer = saveDataString;
-                        MornSaveLogger.Log("セーブデータをクリップボードに貼り付けました");
+                        MornSaveGlobal.Logger.Log("セーブデータをクリップボードに貼り付けました");
                     }
                 },
                 destroyCancellationToken);
@@ -109,18 +109,18 @@ namespace MornLib
                 if (Directory.Exists(dirPath))
                 {
                     Directory.Delete(dirPath, true);
-                    MornSaveLogger.Log($"セーブディレクトリを削除しました: {dirPath}");
+                    MornSaveGlobal.Logger.Log($"セーブディレクトリを削除しました: {dirPath}");
                 }
             }
             catch (Exception e)
             {
-                MornSaveLogger.LogError($"セーブディレクトリの削除に失敗: {e.Message}");
+                MornSaveGlobal.Logger.LogError($"セーブディレクトリの削除に失敗: {e.Message}");
             }
 
             // PlayerPrefsを削除
             PlayerPrefs.DeleteAll();
             PlayerPrefs.Save();
-            MornSaveLogger.Log("PlayerPrefsを削除しました");
+            MornSaveGlobal.Logger.Log("PlayerPrefsを削除しました");
         }
     }
 }

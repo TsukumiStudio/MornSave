@@ -18,14 +18,14 @@ namespace MornLib
             {
                 if (value == null)
                 {
-                    MornSaveLogger.LogError("CryptIvにnullは設定できません");
+                    MornSaveGlobal.Logger.LogError("CryptIvにnullは設定できません");
                     return;
                 }
 
                 var byteCount = System.Text.Encoding.UTF8.GetByteCount(value);
                 if (byteCount != 16)
                 {
-                    MornSaveLogger.LogError($"CryptIvは16バイトでなければなりません。現在のバイト数: {byteCount}");
+                    MornSaveGlobal.Logger.LogError($"CryptIvは16バイトでなければなりません。現在のバイト数: {byteCount}");
                     return;
                 }
 
@@ -41,14 +41,14 @@ namespace MornLib
             {
                 if (value == null)
                 {
-                    MornSaveLogger.LogError("CryptKeyにnullは設定できません");
+                    MornSaveGlobal.Logger.LogError("CryptKeyにnullは設定できません");
                     return;
                 }
 
                 var byteCount = System.Text.Encoding.UTF8.GetByteCount(value);
                 if (byteCount != 32)
                 {
-                    MornSaveLogger.LogError($"CryptKeyは32バイトでなければなりません。現在のバイト数: {byteCount}");
+                    MornSaveGlobal.Logger.LogError($"CryptKeyは32バイトでなければなりません。現在のバイト数: {byteCount}");
                     return;
                 }
 
@@ -92,7 +92,7 @@ namespace MornLib
             if (directoryName != null && !Directory.Exists(directoryName))
             {
                 Directory.CreateDirectory(directoryName);
-                MornSaveLogger.Log($"セーブディレクトリを作成しました: {directoryName}");
+                MornSaveGlobal.Logger.Log($"セーブディレクトリを作成しました: {directoryName}");
             }
         }
 
@@ -101,7 +101,7 @@ namespace MornLib
         {
             if (string.IsNullOrEmpty(_cryptIv) || string.IsNullOrEmpty(_cryptKey))
             {
-                MornSaveLogger.LogError("CryptIvまたはCryptKeyが設定されていません。暗号化を使用する場合は設定してください。");
+                MornSaveGlobal.Logger.LogError("CryptIvまたはCryptKeyが設定されていません。暗号化を使用する場合は設定してください。");
             }
             else
             {
@@ -111,7 +111,7 @@ namespace MornLib
                 }
                 catch (Exception e)
                 {
-                    MornSaveLogger.LogError($"暗号化に失敗: {e.Message}");
+                    MornSaveGlobal.Logger.LogError($"暗号化に失敗: {e.Message}");
                 }
             }
 
@@ -123,7 +123,7 @@ namespace MornLib
         {
             if (string.IsNullOrEmpty(_cryptIv) || string.IsNullOrEmpty(_cryptKey))
             {
-                MornSaveLogger.LogError("CryptIvまたはCryptKeyが設定されていません。暗号化を使用する場合は設定してください。");
+                MornSaveGlobal.Logger.LogError("CryptIvまたはCryptKeyが設定されていません。暗号化を使用する場合は設定してください。");
             }
             else
             {
@@ -133,7 +133,7 @@ namespace MornLib
                 }
                 catch (Exception e)
                 {
-                    MornSaveLogger.LogError($"復号化に失敗: {e.Message}");
+                    MornSaveGlobal.Logger.LogError($"復号化に失敗: {e.Message}");
                 }
             }
 
@@ -162,7 +162,7 @@ namespace MornLib
             }
             catch (Exception e)
             {
-                MornSaveLogger.LogError($"PlayerPrefs読み込み時にエラー発生: {e.Message}");
+                MornSaveGlobal.Logger.LogError($"PlayerPrefs読み込み時にエラー発生: {e.Message}");
             }
 
             data = null;
@@ -188,7 +188,7 @@ namespace MornLib
             }
             catch (Exception e)
             {
-                MornSaveLogger.LogError($"PlayerPrefs読み込み時にエラー発生: {e.Message}");
+                MornSaveGlobal.Logger.LogError($"PlayerPrefs読み込み時にエラー発生: {e.Message}");
             }
 
             data = null;
@@ -211,7 +211,7 @@ namespace MornLib
             }
             catch (Exception e)
             {
-                MornSaveLogger.LogError($"ファイル読み込み時にエラー発生: {e.Message}");
+                MornSaveGlobal.Logger.LogError($"ファイル読み込み時にエラー発生: {e.Message}");
             }
 
             data = null;
@@ -236,7 +236,7 @@ namespace MornLib
             }
             catch (Exception e)
             {
-                MornSaveLogger.LogError($"ファイル読み込み時にエラー発生: {e.Message}");
+                MornSaveGlobal.Logger.LogError($"ファイル読み込み時にエラー発生: {e.Message}");
             }
 
             data = null;
@@ -256,15 +256,15 @@ namespace MornLib
 
                 PlayerPrefs.SetString(key, json);
                 PlayerPrefs.Save();
-                MornSaveLogger.Log($"PlayerPrefs保存成功: {key}");
+                MornSaveGlobal.Logger.Log($"PlayerPrefs保存成功: {key}");
                 return true;
             }
             catch (Exception e)
             {
-                MornSaveLogger.LogError($"PlayerPrefs保存時にエラー発生: {e.Message}");
+                MornSaveGlobal.Logger.LogError($"PlayerPrefs保存時にエラー発生: {e.Message}");
             }
 
-            MornSaveLogger.LogError($"PlayerPrefs保存失敗: {key}");
+            MornSaveGlobal.Logger.LogError($"PlayerPrefs保存失敗: {key}");
             return false;
         }
 
@@ -280,15 +280,15 @@ namespace MornLib
 
                 PlayerPrefs.SetString(key, data.ToStringBase64());
                 PlayerPrefs.Save();
-                MornSaveLogger.Log($"PlayerPrefs保存成功: {key}");
+                MornSaveGlobal.Logger.Log($"PlayerPrefs保存成功: {key}");
                 return true;
             }
             catch (Exception e)
             {
-                MornSaveLogger.LogError($"PlayerPrefs保存時にエラー発生: {e.Message}");
+                MornSaveGlobal.Logger.LogError($"PlayerPrefs保存時にエラー発生: {e.Message}");
             }
 
-            MornSaveLogger.LogError($"PlayerPrefs保存失敗: {key}");
+            MornSaveGlobal.Logger.LogError($"PlayerPrefs保存失敗: {key}");
             return false;
         }
 
@@ -311,15 +311,15 @@ namespace MornLib
                 }
 
                 File.WriteAllBytes(filePath, data);
-                MornSaveLogger.Log($"ファイル保存成功: {filePath}");
+                MornSaveGlobal.Logger.Log($"ファイル保存成功: {filePath}");
                 return true;
             }
             catch (Exception e)
             {
-                MornSaveLogger.LogError($"ファイル保存時にエラー発生: {e.Message}");
+                MornSaveGlobal.Logger.LogError($"ファイル保存時にエラー発生: {e.Message}");
             }
 
-            MornSaveLogger.LogError("ファイル保存失敗");
+            MornSaveGlobal.Logger.LogError("ファイル保存失敗");
             return false;
         }
     }
