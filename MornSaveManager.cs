@@ -10,7 +10,7 @@ namespace MornLib
     public abstract class MornSaveManager<TSaveData> : MonoBehaviour where TSaveData : class
     {
         /// <summary> 現在のセーブデータ(内部用) </summary>
-        private TSaveData _current;
+        [SerializeField, ReadOnly] private TSaveData _current;
         /// <summary> 現在のセーブデータ </summary>
         public TSaveData Current => _current ??= Load();
 

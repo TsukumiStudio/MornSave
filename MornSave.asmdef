@@ -2,9 +2,10 @@
   "name": "MornSave",
   "rootNamespace": "MornLib",
   "references": [
-  "GUID:9fb3b15b1474476cbe64c6bd63468fb6",
-  "GUID:1be8a64c9b31e41438dd1516007bcca4",
-  "GUID:dadc2fee866e04157b6aa9c8ff475e67"],
+    "GUID:9fb3b15b1474476cbe64c6bd63468fb6",
+    "GUID:1be8a64c9b31e41438dd1516007bcca4",
+    "GUID:dadc2fee866e04157b6aa9c8ff475e67"
+  ],
   "includePlatforms": [],
   "excludePlatforms": [],
   "allowUnsafeCode": false,
