@@ -5,7 +5,7 @@ namespace MornLib
     [CreateAssetMenu(fileName = nameof(MornSaveGlobal), menuName = "Morn/" + nameof(MornSaveGlobal))]
     public sealed class MornSaveGlobal : MornGlobalBase<MornSaveGlobal>
     {
-        public override string ModuleName => "MornSave";
+        protected override string ModuleName => "MornSave";
         [Tooltip("PlayerPrefsに保存する際のキー名")]
         public string CorePlayerPrefsKey = "SaveData";
         [Tooltip("セーブデータのファイル名（拡張子なし）")]
