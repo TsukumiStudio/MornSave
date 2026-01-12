@@ -3,7 +3,7 @@ using UnityEngine;
 namespace MornLib
 {
     [CreateAssetMenu(fileName = nameof(MornSaveGlobal), menuName = "Morn/" + nameof(MornSaveGlobal))]
-    public sealed class MornSaveGlobal : MornGlobalBase<MornSaveGlobal>
+    internal sealed class MornSaveGlobal : MornGlobalBase<MornSaveGlobal>
     {
         protected override string ModuleName => "MornSave";
         [Tooltip("PlayerPrefsに保存する際のキー名")]

@@ -66,8 +66,9 @@ namespace MornLib
                 destroyCancellationToken);
         }
 
-        private void OnDestroy()
+        protected virtual void OnDestroy()
         {
+            Save();
             _current = null;
         }
 
