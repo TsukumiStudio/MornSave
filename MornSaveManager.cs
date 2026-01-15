@@ -1,6 +1,9 @@
 using System;
 using System.IO;
 using UnityEngine;
+#if USE_STEAM
+using Steamworks;
+#endif
 
 namespace MornLib
 {
@@ -52,12 +55,12 @@ namespace MornLib
                         var success = SteamUserStats.ResetAllStats(true);
                         if (MornSteamManager.Initialized && success)
                         {
-                            MornSaveLogger.Log("Steam実績をリセット");
+                            MornSaveGlobal.Logger.Log("Steam実績をリセット");
                             SteamUserStats.StoreStats();
                         }
                         else
                         {
-                            MornSaveLogger.Log("Steam実績のリセットに失敗");
+                            MornSaveGlobal.Logger.Log("Steam実績のリセットに失敗");
                         }
 #endif
                         MornApp.Quit();
@@ -68,7 +71,6 @@ namespace MornLib
 
         protected virtual void OnDestroy()
         {
-            Save();
             _current = null;
         }
 

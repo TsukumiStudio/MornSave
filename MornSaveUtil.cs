@@ -1,9 +1,6 @@
 using System;
 using System.IO;
 using UnityEngine;
-#if USE_STEAM
-using MornSteam;
-#endif
 
 namespace MornLib
 {
