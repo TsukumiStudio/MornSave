@@ -1,0 +1,24 @@
+{
+  "name": "com.tsukumistudio.mornsave",
+  "version": "1.0.0",
+  "displayName": "MornSave",
+  "description": "Unity 向けの簡単に使えるセーブデータフレームワーク。PlayerPrefs / ファイル保存、AES 暗号化、Steam ユーザーごとのセーブ分離に対応。",
+  "unity": "6000.0",
+  "license": "Unlicense",
+  "author": {
+    "name": "TsukumiStudio"
+  },
+  "keywords": [
+    "save",
+    "savedata",
+    "persistent",
+    "encrypt",
+    "playerprefs"
+  ],
+  "dependencies": {
+    "com.tsukumistudio.mornglobal": "1.0.0",
+    "com.tsukumistudio.mornutil": "1.0.0",
+    "com.tsukumistudio.morndebug": "1.0.0",
+    "com.tsukumistudio.mornsteam": "1.0.0"
+  }
+}
