@@ -1,49 +1,34 @@
 # MornSave
 
+<p align="center">
+  <img src="src/Editor/MornSave.png" alt="MornSave" width="640" />
+</p>
+
+<p align="center">
+  <img src="https://img.shields.io/github/license/TsukumiStudio/MornSave" alt="License" />
+</p>
+
 ## 概要
 
-セーブデータ管理システム。ファイル/PlayerPrefsに自動保存するライブラリ。
+Unity 向けの簡単に使えるセーブデータフレームワーク。PlayerPrefs / ファイル保存、AES 暗号化、Steam ユーザーごとのセーブ分離に対応。
 
-## 依存関係
+## 導入方法
 
-| 種別 | 名前 |
-|------|------|
-| 外部パッケージ | Steam（オプション: USE_STEAM定義時） |
-| Mornライブラリ | MornLib |
+Unity Package Manager で以下の Git URL を追加:
 
-## 使い方
-
-### カスタムセーブマネージャーの作成
-
-```csharp
-public class GameSaveManager : MornSaveManager<GameSaveData>
-{
-    protected override GameSaveData CreateInstance()
-    {
-        return new GameSaveData();
-    }
-
-    protected override bool TryLoad(out GameSaveData result)
-    {
-        // ロード処理
-    }
-
-    protected override void Save(GameSaveData data)
-    {
-        // セーブ処理
-    }
-}
+```
+https://github.com/TsukumiStudio/MornSave.git?path=src#1.0.0
 ```
 
-### 使用方法
+`Window > Package Manager > + > Add package from git URL...` に貼り付けてください。
 
-```csharp
-// データの取得（自動読み込み）
-var data = saveManager.Current;
+### 依存パッケージ
 
-// 手動保存
-saveManager.Save();
+- [MornGlobal](https://github.com/TsukumiStudio/MornGlobal) (`com.tsukumistudio.mornglobal`)
+- [MornUtil](https://github.com/TsukumiStudio/MornUtil) (`com.tsukumistudio.mornutil`)
+- [MornDebug](https://github.com/TsukumiStudio/MornDebug) (`com.tsukumistudio.morndebug`)
+- [MornSteam](https://github.com/TsukumiStudio/MornSteam) (`com.tsukumistudio.mornsteam`)
 
-// リセット
-saveManager.ResetData();
-```
+## ライセンス
+
+[The Unlicense](LICENSE)
