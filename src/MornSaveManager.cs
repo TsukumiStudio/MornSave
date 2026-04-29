@@ -33,7 +33,7 @@ namespace MornLib
         private void Awake()
         {
             MornDebugCore.RegisterGUI(
-                "セーブマネージャ/データコピー",
+                "セーブ/データコピー",
                 () =>
                 {
                     if (GUILayout.Button("クリップボードにコピー"))
@@ -45,7 +45,7 @@ namespace MornLib
                 },
                 destroyCancellationToken);
             MornDebugCore.RegisterGUI(
-                "セーブマネージャ/データ完全削除",
+                "セーブ/データ完全削除",
                 () =>
                 {
                     if (GUILayout.Button("Steam実績を含む完全初期化 & ゲーム終了"))
