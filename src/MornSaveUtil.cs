@@ -116,7 +116,8 @@ namespace MornLib
                     json = PlayerPrefs.GetString(key);
                     if (useDecrypt)
                     {
-                        json = ToDecrypt(json.ToBytesUTF8()).ToStringUTF8();
+                        // 暗号化したバイト列は UTF-8 として往復できないため Base64 で保存している
+                        json = ToDecrypt(json.ToBytesBase64()).ToStringUTF8();
                     }
 
                     return true;
@@ -231,7 +232,7 @@ namespace MornLib
             {
                 if (useEncrypt)
                 {
-                    json = ToEncrypt(json.ToBytesUTF8()).ToStringUTF8();
+                    json = ToEncrypt(json.ToBytesUTF8()).ToStringBase64();
                 }
 
                 PlayerPrefs.SetString(key, json);
@@ -295,7 +296,18 @@ namespace MornLib
                     data = ToEncrypt(data);
                 }
 
-                File.WriteAllBytes(filePath, data);
+                // 書込み途中で落ちても既存のファイルが壊れないよう、一時ファイルに書いてから差し替える
+                var tempPath = filePath + ".tmp";
+                File.WriteAllBytes(tempPath, data);
+                if (File.Exists(filePath))
+                {
+                    File.Replace(tempPath, filePath, null);
+                }
+                else
+                {
+                    File.Move(tempPath, filePath);
+                }
+
                 MornSaveGlobal.Logger.Log($"ファイル保存成功: {filePath}");
                 return true;
             }
