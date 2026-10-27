@@ -301,7 +301,16 @@ namespace MornLib
                 File.WriteAllBytes(tempPath, data);
                 if (File.Exists(filePath))
                 {
-                    File.Replace(tempPath, filePath, null);
+                    try
+                    {
+                        File.Replace(tempPath, filePath, null);
+                    }
+                    catch (Exception e) when (e is PlatformNotSupportedException || e is NotImplementedException)
+                    {
+                        // 差し替えに対応しないプラットフォームでは、原子性を諦めて削除してから移す
+                        File.Delete(filePath);
+                        File.Move(tempPath, filePath);
+                    }
                 }
                 else
                 {
