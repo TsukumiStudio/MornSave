@@ -1,5 +1,6 @@
 using System;
 using System.IO;
+using System.Text;
 using UnityEngine;
 
 namespace MornLib
@@ -8,6 +9,8 @@ namespace MornLib
     {
         /// <summary>16バイトの初期化ベクトル（IV）</summary>
         private static string _cryptIv;
+        /// <summary>32バイトの暗号化キー</summary>
+        private static string _cryptKey;
         /// <summary>16バイトの初期化ベクトル（IV）を設定 </summary>
         public static string CryptIv
         {
@@ -19,7 +22,7 @@ namespace MornLib
                     return;
                 }
 
-                var byteCount = System.Text.Encoding.UTF8.GetByteCount(value);
+                var byteCount = Encoding.UTF8.GetByteCount(value);
                 if (byteCount != 16)
                 {
                     MornSaveGlobal.Logger.LogError($"CryptIvは16バイトでなければなりません。現在のバイト数: {byteCount}");
@@ -29,8 +32,6 @@ namespace MornLib
                 _cryptIv = value;
             }
         }
-        /// <summary>32バイトの暗号化キー</summary>
-        private static string _cryptKey;
         /// <summary>32バイトの暗号化キーを設定</summary>
         public static string CryptKey
         {
@@ -42,7 +43,7 @@ namespace MornLib
                     return;
                 }
 
-                var byteCount = System.Text.Encoding.UTF8.GetByteCount(value);
+                var byteCount = Encoding.UTF8.GetByteCount(value);
                 if (byteCount != 32)
                 {
                     MornSaveGlobal.Logger.LogError($"CryptKeyは32バイトでなければなりません。現在のバイト数: {byteCount}");
@@ -80,6 +81,231 @@ namespace MornLib
             var fileName = MornSaveGlobal.I.CoreFileName + MornSaveGlobal.I.CoreExtensionName;
             var filePath = Path.Combine(GetSaveDirPath(), fileName);
             return filePath;
+        }
+
+        /// <summary> PlayerPrefsからデータを読み込む </summary>
+        public static bool LoadFromPlayerPrefs<T>(string key, out T data, bool useDecrypt = false) where T : class
+        {
+            try
+            {
+                if (LoadJsonFromPlayerPrefs(key, out var json, useDecrypt))
+                {
+                    data = JsonUtility.FromJson<T>(json);
+                    if (data != null)
+                    {
+                        return true;
+                    }
+                }
+            }
+            catch (Exception e)
+            {
+                MornSaveGlobal.Logger.LogError($"PlayerPrefs読み込み時にエラー発生: {e.Message}");
+            }
+
+            data = null;
+            return false;
+        }
+
+        /// <summary> PlayerPrefsからJSON文字列を読み込む (独自に変換した JSON 用) </summary>
+        public static bool LoadJsonFromPlayerPrefs(string key, out string json, bool useDecrypt = false)
+        {
+            try
+            {
+                if (PlayerPrefs.HasKey(key))
+                {
+                    json = PlayerPrefs.GetString(key);
+                    if (useDecrypt)
+                    {
+                        json = ToDecrypt(json.ToBytesUTF8()).ToStringUTF8();
+                    }
+
+                    return true;
+                }
+            }
+            catch (Exception e)
+            {
+                MornSaveGlobal.Logger.LogError($"PlayerPrefs読み込み時にエラー発生: {e.Message}");
+            }
+
+            json = null;
+            return false;
+        }
+
+        /// <summary> ファイルからJSON文字列を読み込む (独自に変換した JSON 用) </summary>
+        public static bool LoadJsonFromFile(string filePath, out string json, bool useDecrypt = false)
+        {
+            if (LoadFromFile(filePath, out var bytes, useDecrypt))
+            {
+                json = bytes.ToStringUTF8();
+                return true;
+            }
+
+            json = null;
+            return false;
+        }
+
+        /// <summary> PlayerPrefsからデータを読み込む </summary>
+        public static bool LoadFromPlayerPrefs(string key, out byte[] data, bool useDecrypt = false)
+        {
+            try
+            {
+                if (PlayerPrefs.HasKey(key))
+                {
+                    var json = PlayerPrefs.GetString(key);
+                    data = json.ToBytesBase64();
+                    if (useDecrypt)
+                    {
+                        data = ToDecrypt(data);
+                    }
+
+                    return true;
+                }
+            }
+            catch (Exception e)
+            {
+                MornSaveGlobal.Logger.LogError($"PlayerPrefs読み込み時にエラー発生: {e.Message}");
+            }
+
+            data = null;
+            return false;
+        }
+
+        /// <summary> ファイルからデータを読み込む </summary>
+        public static bool LoadFromFile<T>(string filePath, out T data, bool useDecrypt = false) where T : class
+        {
+            try
+            {
+                if (LoadJsonFromFile(filePath, out var json, useDecrypt))
+                {
+                    data = JsonUtility.FromJson<T>(json);
+                    if (data != null)
+                    {
+                        return true;
+                    }
+                }
+            }
+            catch (Exception e)
+            {
+                MornSaveGlobal.Logger.LogError($"ファイル読み込み時にエラー発生: {e.Message}");
+            }
+
+            data = null;
+            return false;
+        }
+
+        /// <summary> ファイルからデータを読み込む </summary>
+        public static bool LoadFromFile(string filePath, out byte[] data, bool useDecrypt = false)
+        {
+            try
+            {
+                if (File.Exists(filePath))
+                {
+                    data = File.ReadAllBytes(filePath);
+                    if (useDecrypt)
+                    {
+                        data = ToDecrypt(data);
+                    }
+
+                    return true;
+                }
+            }
+            catch (Exception e)
+            {
+                MornSaveGlobal.Logger.LogError($"ファイル読み込み時にエラー発生: {e.Message}");
+            }
+
+            data = null;
+            return false;
+        }
+
+        /// <summary> PlayerPrefsにデータを保存する </summary>
+        public static bool SaveToPlayerPrefs<T>(string key, T data, bool useEncrypt = false) where T : class
+        {
+            return SaveJsonToPlayerPrefs(key, JsonUtility.ToJson(data, true), useEncrypt);
+        }
+
+        /// <summary> PlayerPrefsにJSON文字列を保存する (独自に変換した JSON 用) </summary>
+        public static bool SaveJsonToPlayerPrefs(string key, string json, bool useEncrypt = false)
+        {
+            try
+            {
+                if (useEncrypt)
+                {
+                    json = ToEncrypt(json.ToBytesUTF8()).ToStringUTF8();
+                }
+
+                PlayerPrefs.SetString(key, json);
+                PlayerPrefs.Save();
+                MornSaveGlobal.Logger.Log($"PlayerPrefs保存成功: {key}");
+                return true;
+            }
+            catch (Exception e)
+            {
+                MornSaveGlobal.Logger.LogError($"PlayerPrefs保存時にエラー発生: {e.Message}");
+            }
+
+            MornSaveGlobal.Logger.LogError($"PlayerPrefs保存失敗: {key}");
+            return false;
+        }
+
+        /// <summary> PlayerPrefsにデータを保存する </summary>
+        public static bool SaveToPlayerPrefs(string key, byte[] data, bool useEncrypt = false)
+        {
+            try
+            {
+                if (useEncrypt)
+                {
+                    data = ToEncrypt(data);
+                }
+
+                PlayerPrefs.SetString(key, data.ToStringBase64());
+                PlayerPrefs.Save();
+                MornSaveGlobal.Logger.Log($"PlayerPrefs保存成功: {key}");
+                return true;
+            }
+            catch (Exception e)
+            {
+                MornSaveGlobal.Logger.LogError($"PlayerPrefs保存時にエラー発生: {e.Message}");
+            }
+
+            MornSaveGlobal.Logger.LogError($"PlayerPrefs保存失敗: {key}");
+            return false;
+        }
+
+        /// <summary> ファイルにデータを保存する </summary>
+        public static bool SaveToFile<T>(string filePath, T data, bool useEncrypt = false) where T : class
+        {
+            return SaveJsonToFile(filePath, JsonUtility.ToJson(data, true), useEncrypt);
+        }
+
+        /// <summary> ファイルにJSON文字列を保存する (独自に変換した JSON 用) </summary>
+        public static bool SaveJsonToFile(string filePath, string json, bool useEncrypt = false)
+        {
+            return SaveToFile(filePath, json.ToBytesUTF8(), useEncrypt);
+        }
+
+        /// <summary> ファイルにデータを保存する </summary>
+        public static bool SaveToFile(string filePath, byte[] data, bool useEncrypt = false)
+        {
+            try
+            {
+                EnsurePath(filePath);
+                if (useEncrypt)
+                {
+                    data = ToEncrypt(data);
+                }
+
+                File.WriteAllBytes(filePath, data);
+                MornSaveGlobal.Logger.Log($"ファイル保存成功: {filePath}");
+                return true;
+            }
+            catch (Exception e)
+            {
+                MornSaveGlobal.Logger.LogError($"ファイル保存時にエラー発生: {e.Message}");
+            }
+
+            MornSaveGlobal.Logger.LogError("ファイル保存失敗");
+            return false;
         }
 
         /// <summary> 指定されたパスのディレクトリが存在しない場合、作成する </summary>
@@ -135,189 +361,6 @@ namespace MornLib
             }
 
             return data;
-        }
-
-        /// <summary> PlayerPrefsからデータを読み込む </summary>
-        public static bool LoadFromPlayerPrefs<T>(string key, out T data, bool useDecrypt = false) where T : class
-        {
-            try
-            {
-                if (PlayerPrefs.HasKey(key))
-                {
-                    var json = PlayerPrefs.GetString(key);
-                    if (useDecrypt)
-                    {
-                        json = ToDecrypt(json.ToBytesUTF8()).ToStringUTF8();
-                    }
-
-                    data = JsonUtility.FromJson<T>(json);
-                    if (data != null)
-                    {
-                        return true;
-                    }
-                }
-            }
-            catch (Exception e)
-            {
-                MornSaveGlobal.Logger.LogError($"PlayerPrefs読み込み時にエラー発生: {e.Message}");
-            }
-
-            data = null;
-            return false;
-        }
-
-        /// <summary> PlayerPrefsからデータを読み込む </summary>
-        public static bool LoadFromPlayerPrefs(string key, out byte[] data, bool useDecrypt = false)
-        {
-            try
-            {
-                if (PlayerPrefs.HasKey(key))
-                {
-                    var json = PlayerPrefs.GetString(key);
-                    data = json.ToBytesBase64();
-                    if (useDecrypt)
-                    {
-                        data = ToDecrypt(data);
-                    }
-
-                    return true;
-                }
-            }
-            catch (Exception e)
-            {
-                MornSaveGlobal.Logger.LogError($"PlayerPrefs読み込み時にエラー発生: {e.Message}");
-            }
-
-            data = null;
-            return false;
-        }
-
-        /// <summary> ファイルからデータを読み込む </summary>
-        public static bool LoadFromFile<T>(string filePath, out T data, bool useDecrypt = false) where T : class
-        {
-            try
-            {
-                if (LoadFromFile(filePath, out var bytes, useDecrypt))
-                {
-                    data = JsonUtility.FromJson<T>(bytes.ToStringUTF8());
-                    if (data != null)
-                    {
-                        return true;
-                    }
-                }
-            }
-            catch (Exception e)
-            {
-                MornSaveGlobal.Logger.LogError($"ファイル読み込み時にエラー発生: {e.Message}");
-            }
-
-            data = null;
-            return false;
-        }
-
-        /// <summary> ファイルからデータを読み込む </summary>
-        public static bool LoadFromFile(string filePath, out byte[] data, bool useDecrypt = false)
-        {
-            try
-            {
-                if (File.Exists(filePath))
-                {
-                    data = File.ReadAllBytes(filePath);
-                    if (useDecrypt)
-                    {
-                        data = ToDecrypt(data);
-                    }
-
-                    return true;
-                }
-            }
-            catch (Exception e)
-            {
-                MornSaveGlobal.Logger.LogError($"ファイル読み込み時にエラー発生: {e.Message}");
-            }
-
-            data = null;
-            return false;
-        }
-
-        /// <summary> PlayerPrefsにデータを保存する </summary>
-        public static bool SaveToPlayerPrefs<T>(string key, T data, bool useEncrypt = false) where T : class
-        {
-            var json = JsonUtility.ToJson(data, true);
-            try
-            {
-                if (useEncrypt)
-                {
-                    json = ToEncrypt(json.ToBytesUTF8()).ToStringUTF8();
-                }
-
-                PlayerPrefs.SetString(key, json);
-                PlayerPrefs.Save();
-                MornSaveGlobal.Logger.Log($"PlayerPrefs保存成功: {key}");
-                return true;
-            }
-            catch (Exception e)
-            {
-                MornSaveGlobal.Logger.LogError($"PlayerPrefs保存時にエラー発生: {e.Message}");
-            }
-
-            MornSaveGlobal.Logger.LogError($"PlayerPrefs保存失敗: {key}");
-            return false;
-        }
-
-        /// <summary> PlayerPrefsにデータを保存する </summary>
-        public static bool SaveToPlayerPrefs(string key, byte[] data, bool useEncrypt = false)
-        {
-            try
-            {
-                if (useEncrypt)
-                {
-                    data = ToEncrypt(data);
-                }
-
-                PlayerPrefs.SetString(key, data.ToStringBase64());
-                PlayerPrefs.Save();
-                MornSaveGlobal.Logger.Log($"PlayerPrefs保存成功: {key}");
-                return true;
-            }
-            catch (Exception e)
-            {
-                MornSaveGlobal.Logger.LogError($"PlayerPrefs保存時にエラー発生: {e.Message}");
-            }
-
-            MornSaveGlobal.Logger.LogError($"PlayerPrefs保存失敗: {key}");
-            return false;
-        }
-
-        /// <summary> ファイルにデータを保存する </summary>
-        public static bool SaveToFile<T>(string filePath, T data, bool useEncrypt = false) where T : class
-        {
-            var json = JsonUtility.ToJson(data, true);
-            return SaveToFile(filePath, json.ToBytesUTF8(), useEncrypt);
-        }
-
-        /// <summary> ファイルにデータを保存する </summary>
-        public static bool SaveToFile(string filePath, byte[] data, bool useEncrypt = false)
-        {
-            try
-            {
-                EnsurePath(filePath);
-                if (useEncrypt)
-                {
-                    data = ToEncrypt(data);
-                }
-
-                File.WriteAllBytes(filePath, data);
-                MornSaveGlobal.Logger.Log($"ファイル保存成功: {filePath}");
-                return true;
-            }
-            catch (Exception e)
-            {
-                MornSaveGlobal.Logger.LogError($"ファイル保存時にエラー発生: {e.Message}");
-            }
-
-            MornSaveGlobal.Logger.LogError("ファイル保存失敗");
-            return false;
         }
     }
 }
